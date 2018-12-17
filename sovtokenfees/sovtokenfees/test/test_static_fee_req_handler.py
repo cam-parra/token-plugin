@@ -179,7 +179,7 @@ class TestStaticValidation:
         fee_handler.doStaticValidation(request)
 
 
-class TestValidation():
+class TestValidation:
     def test_set_fees_invalid_signee(self, helpers, fee_handler):
         """
         Validation of a set_fees request where one of the signees doesn't
@@ -459,32 +459,17 @@ def test_static_fee_req_handler_apply(helpers, fee_handler):
     assert ret_value[0] == prev_size + 1
 
 
-def not_equal_to_assert(n):
-    assert n.getLedgerRootHash(DOMAIN_LEDGER_ID, isCommitted=False) != n.getLedgerRootHash(DOMAIN_LEDGER_ID,
-                                                                                           isCommitted=True)
+def check_state(n, is_equal=False):
+    assert (n.getLedgerRootHash(DOMAIN_LEDGER_ID, isCommitted=False) == n.getLedgerRootHash(DOMAIN_LEDGER_ID, isCommitted=True)) == is_equal
 
-    assert n.getLedgerRootHash(TOKEN_LEDGER_ID, isCommitted=False) != \
-           n.getLedgerRootHash(TOKEN_LEDGER_ID, isCommitted=True)
+    assert (n.getLedgerRootHash(TOKEN_LEDGER_ID, isCommitted=False) ==\
+           n.getLedgerRootHash(TOKEN_LEDGER_ID, isCommitted=True)) == is_equal
 
-    assert n.getState(DOMAIN_LEDGER_ID).headHash != \
-           n.getState(DOMAIN_LEDGER_ID).committedHeadHash
+    assert (n.getState(DOMAIN_LEDGER_ID).headHash ==\
+           n.getState(DOMAIN_LEDGER_ID).committedHeadHash) == is_equal
 
-    assert n.getState(TOKEN_LEDGER_ID).headHash != \
-           n.getState(TOKEN_LEDGER_ID).committedHeadHash
-
-
-def equal_to_assert(n):
-    assert n.getLedgerRootHash(DOMAIN_LEDGER_ID, isCommitted=False) == n.getLedgerRootHash(DOMAIN_LEDGER_ID,
-                                                                                           isCommitted=True)
-
-    assert n.getLedgerRootHash(TOKEN_LEDGER_ID, isCommitted=False) == \
-           n.getLedgerRootHash(TOKEN_LEDGER_ID, isCommitted=True)
-
-    assert n.getState(DOMAIN_LEDGER_ID).headHash == \
-           n.getState(DOMAIN_LEDGER_ID).committedHeadHash
-
-    assert n.getState(TOKEN_LEDGER_ID).headHash == \
-           n.getState(TOKEN_LEDGER_ID).committedHeadHash
+    assert (n.getState(TOKEN_LEDGER_ID).headHash ==\
+           n.getState(TOKEN_LEDGER_ID).committedHeadHash) == is_equal
 
 
 def test_num_uncommited_3pc_batches_with_fees_equal_to(looper, helpers,
@@ -507,7 +492,7 @@ def test_num_uncommited_3pc_batches_with_fees_equal_to(looper, helpers,
         r = sdk_send_signed_requests(sdk_pool_handle, [json.dumps(request.as_dict)])[0]
 
         for n in nodeSetWithIntegratedTokenPlugin:
-            looper.run(eventually(equal_to_assert, n, retryWait=0.2, timeout=15))
+            looper.run(eventually(check_state, n, True, retryWait=0.2, timeout=15))
 
         for n in nodeSetWithIntegratedTokenPlugin:
             n.start_catchup()
@@ -542,7 +527,7 @@ def test_num_uncommited_3pc_batches_with_fees_not_equal_to(looper, helpers,
         r = sdk_send_signed_requests(sdk_pool_handle, [json.dumps(request.as_dict)])[0]
 
         for n in nodeSetWithIntegratedTokenPlugin:
-            looper.run(eventually(not_equal_to_assert, n, retryWait=0.2, timeout=15))
+            looper.run(eventually(check_state, n, False, retryWait=0.2, timeout=15))
 
         for n in nodeSetWithIntegratedTokenPlugin:
             n.start_catchup()

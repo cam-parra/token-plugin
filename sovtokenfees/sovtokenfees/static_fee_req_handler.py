@@ -206,7 +206,6 @@ class StaticFeesReqHandler(FeeReqHandler):
                     txn[FEES] = r[i]
                     i += 1
 
-
     def _validate_fees_can_pay(self, request, inputs, outputs, required_fees):
         """
         Calculate and verify that inputs and outputs for fees can both be paid and change is properly specified
@@ -235,7 +234,6 @@ class StaticFeesReqHandler(FeeReqHandler):
                 request,
                 'fees: {}'.format(required_fees)
             )
-
 
     def _get_fees(self, is_committed=False, with_proof=False):
         fees = {}
